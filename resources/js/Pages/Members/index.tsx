@@ -57,7 +57,7 @@ export default function Members() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead></TableHead>
+                            <TableHead>Member Image</TableHead>
                             <TableHead>Membership ID</TableHead>
                             <TableHead>Member Name</TableHead>
                             <TableHead>Phone</TableHead>
@@ -72,7 +72,12 @@ export default function Members() {
                         {members.data.map((member: Member) => (
                             <TableRow key={member?.id}>
                                 <TableCell>
-                                    <img src={member?.photo as string} className="w-14 h-14 object-cover rounded-full border-2 border-primary p-0.5" alt="Member" />
+                                <img 
+                                    src={member?.photo as string} 
+                                    className="w-14 h-14 sm:w-10 sm:h-10 object-cover rounded-full border-2 border-primary p-0.5" 
+                                    alt="Member" 
+                                />
+
                                 </TableCell>
                                 <TableCell>{member?.id}</TableCell>
                                 <TableCell>{member?.name}</TableCell>

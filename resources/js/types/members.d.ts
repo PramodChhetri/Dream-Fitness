@@ -61,6 +61,7 @@ interface Member {
     emergency_person_phone: string;
     locker?: Locker;
     active_locker?: Locker;
+    refundAmount?: number;
 }
 
 interface PaginationLink {

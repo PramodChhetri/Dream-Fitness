@@ -24,7 +24,7 @@ export const DesktopBar = () => {
             <div className="flex h-full max-h-screen flex-col gap-2">
                 <div className="flex h-14 items-center justify-between gap-4 border-b px-4 lg:h-[60px] lg:px-6">
                     <Link href="/" className="flex items-center">
-                        <span className='font-bold drop-shadow-md capitalize text-sm'>Chitwangym Gaindakot</span>
+                        <span className='font-bold drop-shadow-md capitalize text-sm'>Dream Fitness</span>
                     </Link>
                 </div>
                 <div className="flex-1">

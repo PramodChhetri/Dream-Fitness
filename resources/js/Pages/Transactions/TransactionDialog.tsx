@@ -79,6 +79,7 @@ const TransactionDialog = () => {
                                 <SelectContent>
                                     <SelectItem value="service">Service</SelectItem>
                                     <SelectItem value="product">Product</SelectItem>
+                                    <SelectItem value="refund">Refund</SelectItem>
                                     <SelectItem value="others">Others</SelectItem>
                                 </SelectContent>
                             </Select>

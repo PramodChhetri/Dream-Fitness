@@ -13,7 +13,7 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users') -> insert([
+        DB::table('users')->insert([
             [
                 'name' => 'Nexis Admin',
                 'email' => 'nexisnepal@gmail.com',
@@ -21,17 +21,11 @@ class UsersTableSeeder extends Seeder
                 'email_verified_at' => now()
             ],
             [
-                'name' => 'Nabin Rana',
-                'email' => 'nabin056@gmail.com',
-                'password' => Hash::make('gaindakotchitwangym'),
+                'name' => 'Dream Fitness Admin',
+                'email' => 'dreamfitness@gmail.com',
+                'password' => Hash::make('dreamfitness'),
                 'email_verified_at' => now()
             ],
-            [
-                'name' => 'CPFC - Gaindakot',
-                'email' => 'newchitwangymgaindakot@gmail.com',
-                'password' => Hash::make('gaindakotchitwangym'),
-                'email_verified_at' => now()
-            ]
         ]);
     }
 }

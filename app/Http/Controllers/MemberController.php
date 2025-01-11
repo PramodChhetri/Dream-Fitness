@@ -9,6 +9,7 @@ use App\Models\Locker;
 use App\Models\Member;
 use App\Models\MembershipPackage;
 use App\Models\Payment;
+use App\Models\Transaction;
 use App\Services\AccessControlService;
 use App\Services\StoreMemberService;
 use Carbon\Carbon;
@@ -141,6 +142,10 @@ class MemberController extends Controller
 
         $members->each(function ($member) {
             $member->all_payments = $member->allPayments();
+            // $refundTransactions = Transaction::where('member_id', $member->id)
+            //     ->where('transaction_type', 'refund')
+            //     ->get();
+            // $member->refundAmount = $refundTransactions->sum('paid_amount');
         });
 
 

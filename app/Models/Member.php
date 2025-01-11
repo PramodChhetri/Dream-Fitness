@@ -17,11 +17,15 @@ class Member extends Model
 
     public function getPlainImageAttribute()
     {
-        $imagePath = $this->attributes['photo'];
+        $imagePath = $this->attributes['photo'] ?? null;
 
-        // Remove query string if it exists
+        if ($imagePath === null) {
+            return null; // or provide a default value like an empty string or placeholder image URL
+        }
+
         return preg_replace('/\?v=\d+/', '', $imagePath);
     }
+
 
 
     /**
