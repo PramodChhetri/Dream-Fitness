@@ -1,0 +1,146 @@
+import { usePage, useForm } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Button } from '@/Components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/Components/ui/dialog';
+import { Input } from '@/Components/ui/input';
+import { Label } from '@/Components/ui/label';
+import { toast } from '@/Components/ui/use-toast';
+
+const AddAccessControlDialog = () => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Using useForm from Inertia.js for form handling
+    const { data, setData, post, processing, reset, errors, clearErrors } = useForm({
+        name: '',
+        ip_address: '',
+        username: '',
+        password: '',
+        port: '80',
+        description: '',
+    });
+
+    // Handle form submission
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        clearErrors();
+
+        post(route('settings.storeAccessControl'), {
+            onSuccess: () => {
+                toast({ title: 'Success', description: 'Access Control added successfully' });
+                reset();
+                setIsOpen(false);
+            },
+            onError: () => {
+                toast({ title: 'Error', description: 'Failed to add Access Control', variant: 'destructive' });
+            },
+        });
+
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button>Add Access Control</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Access Control</DialogTitle>
+                </DialogHeader>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name */}
+                    <div>
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            placeholder="Enter name"
+                            disabled={processing}
+                        />
+                        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {/* IP Address */}
+                        <div className='grow'>
+                            <Label htmlFor="ip_address">IP Address</Label>
+                            <Input
+                                id="ip_address"
+                                value={data.ip_address}
+                                onChange={(e) => setData('ip_address', e.target.value)}
+                                placeholder="192.168.0.1"
+                                disabled={processing}
+                            />
+                            {errors.ip_address && <p className="text-red-500 text-sm">{errors.ip_address}</p>}
+                        </div>
+                        {/* Port */}
+                        <div className='grow max-w-28'>
+                            <Label htmlFor="port">Port</Label>
+                            <Input
+                                id="port"
+                                value={data.port}
+                                onChange={(e) => setData('port', e.target.value)}
+                                placeholder="80"
+                                type="number"
+                                disabled={processing}
+                            />
+                            {errors.port && <p className="text-red-500 text-sm">{errors.port}</p>}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        {/* Username */}
+                        <div className='grow'>
+                            <Label htmlFor="username">Username</Label>
+                            <Input
+                                id="username"
+                                value={data.username}
+                                onChange={(e) => setData('username', e.target.value)}
+                                placeholder="admin"
+                                disabled={processing}
+                            />
+                            {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+                        </div>
+
+                        {/* Password */}
+                        <div className='grow'>
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="text"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                placeholder="Enter password"
+                                disabled={processing}
+                            />
+                            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                        <Label htmlFor="description">Description</Label>
+                        <Input
+                            id="description"
+                            value={data.description}
+                            onChange={(e) => setData('description', e.target.value)}
+                            placeholder="Description"
+                            disabled={processing}
+                        />
+                        {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button type="submit" disabled={processing} className="w-full mt-4">
+                        {processing ? 'Saving...' : 'Save'}
+                    </Button>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export default AddAccessControlDialog;
