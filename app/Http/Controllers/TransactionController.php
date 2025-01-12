@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMiscellaneousTransactionRequest;
 use App\Models\EntryPayment;
+use App\Models\Expense;
 use App\Models\LockerPayment;
+use App\Models\Member;
 use App\Models\MembershipRenewal;
+use App\Models\Refund;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -33,6 +37,12 @@ class TransactionController extends Controller
                 break;
             case 'miscellaneous':
                 $query = Transaction::with('invoice')->with('member');
+                break;
+            case 'refunds':
+                $query = Refund::with('member');
+                break;
+            case 'expenses':
+                $query = Expense::with('member');
                 break;
             default:
                 $query = EntryPayment::with('member.membershipPackage');
@@ -76,17 +86,95 @@ class TransactionController extends Controller
      */
     public function store(StoreMiscellaneousTransactionRequest $request)
     {
-        // Start a transaction
-        return DB::transaction(function () use ($request) {
-            $data = $request->validated();
-            $data['remarks'] = $request->input('description', '');
-            $transaction = Transaction::create($data);
-            $credit = $transaction->total_amount - $transaction->paid_amount;
-            if ($transaction->member)
-                $transaction->member->update(['credit' => $transaction->member->credit + $credit]);
-            return redirect()->back()->with('success', 'Transaction and invoice created successfully.');
-        });
+        $data = $request->validated();
+
+        if ($data['transaction_type'] === 'refund') {
+            return DB::transaction(function () use ($data) {
+                $data['payment_date'] = Carbon::now();
+
+                $totalRefundAmount = $data['refund_amount'];
+                $member = Member::findOrFail($data['member_id']);
+
+                $memberBalance = $member->credit; // Positive for credit, negative for advance
+
+                if ($memberBalance < 0) {
+                    // Handle refund when the member has an outstanding advance (negative balance)
+                    $absAdvanceAmount = abs($memberBalance);
+
+                    if ($totalRefundAmount > $absAdvanceAmount) {
+                        // The refund amount exceeds the member's advance balance
+                        $amountToBeAddedAsCredit = $totalRefundAmount - $absAdvanceAmount;
+
+                        // Adjust the member's balance to reflect the new credit
+                        $member->update(['credit' => $amountToBeAddedAsCredit]);
+
+                        // Record a refund transaction
+                        Refund::create([
+                            'refund_amount' => $totalRefundAmount,
+                            'payment_date' => $data['payment_date'],
+                            'payment_mode' => $data['payment_mode'],
+                            'description' => $data['description'] ?? null,
+                            'member_id' => $member->id,
+                            'payment_voucher' => $data['payment_voucher'] ?? null,
+                        ]);
+                    } else {
+                        // The refund amount only reduces the member's advance balance
+                        $member->update(['credit' => $memberBalance + $totalRefundAmount]);
+
+                        Refund::create([
+                            'refund_amount' => $totalRefundAmount,
+                            'payment_date' => $data['payment_date'],
+                            'payment_mode' => $data['payment_mode'],
+                            'description' => $data['description'] ?? null,
+                            'member_id' => $member->id,
+                            'payment_voucher' => $data['payment_voucher'] ?? null,
+                        ]);
+                    }
+                } else if ($memberBalance > 0) {
+                    // Handle refund when the member has a credit balance (positive balance)
+                    $member->update(['credit' => $memberBalance + $totalRefundAmount]);
+
+                    // Record a refund transaction
+                    Refund::create([
+                        'refund_amount' => $totalRefundAmount,
+                        'payment_date' => $data['payment_date'],
+                        'payment_mode' => $data['payment_mode'],
+                        'description' => $data['description'] ?? null,
+                        'member_id' => $member->id,
+                        'payment_voucher' => $data['payment_voucher'] ?? null,
+                    ]);
+                } else {
+                    // Record a refund transaction
+                    Refund::create([
+                        'refund_amount' => $totalRefundAmount,
+                        'payment_date' => $data['payment_date'],
+                        'payment_mode' => $data['payment_mode'],
+                        'description' => $data['description'] ?? null,
+                        'member_id' => $member->id,
+                        'payment_voucher' => $data['payment_voucher'] ?? null,
+                    ]);
+                }
+
+                return redirect()->back()->with('success', 'Refund transaction completed successfully.');
+            });
+        } else {
+            // Handle other transaction types
+            return DB::transaction(function () use ($data) {
+                $data['payment_date'] = Carbon::now();
+                $data['remarks'] = $data['description'] ?? '';
+
+                $transaction = Transaction::create($data);
+                $credit = $transaction->total_amount - $transaction->paid_amount;
+
+                if ($transaction->member) {
+                    $transaction->member->update(['credit' => $transaction->member->credit + $credit]);
+                }
+
+                return redirect()->back()->with('success', 'Transaction and invoice created successfully.');
+            });
+        }
     }
+
 
     /**
      * Display the specified resource.

@@ -138,6 +138,8 @@ export default function Transactions({ auth, data, activeTab }: PageProps<{ data
                                 <TabsTrigger value="renewals">Renewals</TabsTrigger>
                                 <TabsTrigger value="lockers">Lockers</TabsTrigger>
                                 <TabsTrigger value="miscellaneous">Miscellaneous</TabsTrigger>
+                                <TabsTrigger value="refunds">Refunds</TabsTrigger>
+                                <TabsTrigger value="expenses">Expenses</TabsTrigger>
                             </TabsList>
                             <span>
                                 showing {data.data.length} of {data.total} records
@@ -154,6 +156,9 @@ export default function Transactions({ auth, data, activeTab }: PageProps<{ data
                                 {currentTab === 'renewals' && renderRenewalsTable(data)}
                                 {currentTab === 'lockers' && renderLockerTable(data)}
                                 {currentTab === 'miscellaneous' && renderMiscellaneousTable(data)}
+                                {currentTab === 'refunds' && renderRefundTable(data)}
+                                {currentTab === 'expenses' && renderExpenseTable(data)}
+
 
                                 {/* Render Pagination */}
                                 <div className="flex justify-end mt-4 space-x-2">
@@ -381,6 +386,98 @@ function renderMiscellaneousTable(data: any) {
                             <TableCell>
                                 <Badge>
                                     {transaction.bill_number || 'N/A'}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>{transaction.payment_mode}</TableCell>
+                            <TableCell>
+                                {
+                                    transaction?.description?.length > 0 ? (transaction.description as string).substring(0, 50) : ''
+                                }
+                                {
+                                    transaction?.description?.length > 50 ? '...' : ''
+                                }
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </CardContent>
+    );
+}
+
+
+function renderRefundTable(data: any) {
+    return (
+        <CardContent>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Member Name</TableHead>
+                        <TableHead>Refund Amount</TableHead>
+                        <TableHead>PV No.</TableHead>
+                        <TableHead>Payment Mode</TableHead>
+                        <TableHead>Description</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {data.data.map((transaction: any) => (
+                        <TableRow key={transaction.id}>
+                            <TableCell>{format(new Date(transaction.payment_date).toLocaleDateString(), 'yyyy-MM-dd')}</TableCell>
+                            <TableCell>{
+                                transaction.member?.name
+                            }</TableCell>
+                            <TableCell>Rs {transaction.refund_amount}</TableCell>
+                            <TableCell>
+                                <Badge>
+                                    {transaction.payment_voucher || 'N/A'}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>{transaction.payment_mode}</TableCell>
+                            <TableCell>
+                                {
+                                    transaction?.description?.length > 0 ? (transaction.description as string).substring(0, 50) : ''
+                                }
+                                {
+                                    transaction?.description?.length > 50 ? '...' : ''
+                                }
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </CardContent>
+    );
+}
+
+
+function renderExpenseTable(data: any) {
+    return (
+        <CardContent>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Expense Amount</TableHead>
+                        <TableHead>Transaction Type</TableHead>
+                        <TableHead>PV No.</TableHead>
+                        <TableHead>Payment Mode</TableHead>
+                        <TableHead>Description</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {data.data.map((transaction: any) => (
+                        <TableRow key={transaction.id}>
+                            <TableCell>{format(new Date(transaction.payment_date).toLocaleDateString(), 'yyyy-MM-dd')}</TableCell>
+                            <TableCell>{
+                                transaction.member?.name
+                            }</TableCell>
+                            <TableCell>Rs {transaction.expense_amount}</TableCell>
+                            <TableCell>{transaction.transaction_type}</TableCell>
+                            <TableCell>
+                                <Badge>
+                                    {transaction.payment_voucher || 'N/A'}
                                 </Badge>
                             </TableCell>
                             <TableCell>{transaction.payment_mode}</TableCell>

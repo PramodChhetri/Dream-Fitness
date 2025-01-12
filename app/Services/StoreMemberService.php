@@ -79,7 +79,7 @@ class StoreMemberService
             'paid_amount' => $validatedData['paid'],
             'net_amount' => $validatedData['amount'],
             'package_discount' => $validatedData['package_discount'],
-            'payment_date' => $member->start_date,
+            $data['payment_date'] = Carbon::parse($member->start_date)->setTime(now()->hour, now()->minute, now()->second),
             'bill_number' => $validatedData['bill_number'],
             'active_till' => Carbon::parse($member->start_date)->addMonths((int) $validatedData['months'])->format('Y-m-d'),
             'payment_proof' => $validatedData['payment_proof'] ?? null,

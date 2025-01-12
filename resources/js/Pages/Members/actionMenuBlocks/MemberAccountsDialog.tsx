@@ -20,6 +20,8 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
     // Combine all types of payments into a unified array
     const ledger = Object.values(member.all_payments);
 
+    console.log('legder : ', ledger );
+
     // Ensure that sorting considers all dates correctly
     ledger.sort((a: any, b: any) => {
         const dateA = new Date(a.payment_date || a.created_at);
@@ -32,12 +34,14 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
         const { data, setData, errors, post, processing, reset } = useForm({
             member_id: member.id,
             transaction_type: '',
+            refund_amount: '',
             description: '',
             total_amount: '',
             paid_amount: '',
             payment_date: '',
             payment_mode: '',
             bill_number: '',
+            payment_voucher: '',
         });
 
         const handleSubmit = (e: React.FormEvent) => {
@@ -57,120 +61,154 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
 
         return (
             <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant={"default"} className="w-fit ms-auto">Add Transaction</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-[500px]">
-                    <form onSubmit={handleSubmit} className="space-y-2">
-                        <div className="space-y-2">
-                            <h4 className="font-medium leading-none">Add Transaction</h4>
-                            <p className="text-sm text-muted-foreground">
-                                Enter the miscellaneous transaction details for <strong>{member.name}</strong>
-                            </p>
-                        </div>
+            <DialogTrigger asChild>
+                <Button variant="default" className="w-fit ms-auto">Add Transaction</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[500px]">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none">Add Transaction</h4>
+                        <p className="text-sm text-muted-foreground">
+                            Enter the miscellaneous transaction details for <strong>{member.name}</strong>
+                        </p>
+                    </div>
+        
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Transaction Type */}
                         <div>
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                                <div>
-                                    <Label>Transaction Type</Label>
-                                    <Select
-                                        value={data.transaction_type}
-                                        onValueChange={(val) => setData('transaction_type', val)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select transaction type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="service">Service</SelectItem>
-                                            <SelectItem value="product">Product</SelectItem>
-                                            <SelectItem value="credit-payment">Credit Payment</SelectItem>
-                                            <SelectItem value="others">Others</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.transaction_type} />
-                                </div>
-
-                                {data.transaction_type !== 'credit-payment' ? <div>
-                                    <Label>Total Amount</Label>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter total amount"
-                                        value={data.total_amount}
-                                        onChange={(e) => setData('total_amount', e.target.value)}
-                                    />
-                                    <InputError message={errors.total_amount} />
-                                </div> : ''}
-
-                                <div>
-                                    <Label>Payment Amount</Label>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter paid amount"
-                                        value={data.paid_amount}
-                                        onChange={(e) => setData('paid_amount', e.target.value)}
-                                    />
-                                    <InputError message={errors.paid_amount} />
-                                </div>
-
-                                <div>
-                                    <Label>Payment Mode</Label>
-                                    <Select
-                                        value={data.payment_mode}
-                                        onValueChange={(val) => setData('payment_mode', val)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select payment mode" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Cash">Cash</SelectItem>
-                                            <SelectItem value="QR">QR</SelectItem>
-                                            <SelectItem value="Cash + QR">Cash + QR</SelectItem>
-                                            <SelectItem value="Cheque">Cheque</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.payment_mode} />
-                                </div>
-
-                                <div>
-                                    <Label>Payment Date</Label>
-                                    <Input
-                                        type="date"
-                                        value={data.payment_date}
-                                        onChange={(e) => setData('payment_date', e.target.value)}
-                                    />
-                                    <InputError message={errors.payment_date} />
-                                </div>
-
-                                <div className={data.transaction_type === 'credit-payment' ? 'col-span-full' : ''}>
-                                    <Label>Bill Number (optional)</Label>
-                                    <Input
-                                        placeholder="Enter bill number (if applicable)"
-                                        onChange={(e) => setData('bill_number', e.target.value)}
-                                    />
-                                    <InputError message={errors.bill_number} />
-                                </div>
-                            </div>
-
-                            {/* Full-width for larger fields */}
-                            <div className="grid grid-cols-1 gap-4 mt-4">
-                                <div>
-                                    <Label>Description</Label>
-                                    <Textarea
-                                        placeholder="Enter Description of the transaction"
-                                        value={data.description}
-                                        onChange={(e) => setData('description', e.target.value)}
-                                    />
-                                    <InputError message={errors.description} />
-                                </div>
-                            </div>
-
-                            {/* Submit Button */}
-                            <Button type="submit" className="mt-4 w-full" disabled={processing}>
-                                {processing ? 'Processing...' : 'Create Transaction'}
-                            </Button>
+                            <Label>Transaction Type</Label>
+                            <Select
+                                value={data.transaction_type}
+                                onValueChange={(val) => setData('transaction_type', val)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select transaction type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="service">Service</SelectItem>
+                                    <SelectItem value="product">Product</SelectItem>
+                                    <SelectItem value="credit-payment">Credit Payment</SelectItem>
+                                    <SelectItem value="refund">Refund</SelectItem>
+                                    <SelectItem value="others">Others</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError message={errors.transaction_type} />
                         </div>
-                    </form>
-                </DialogContent>
-            </Dialog>
+        
+                        {/* Conditional Fields */}
+                        {data.transaction_type !== 'credit-payment' && data.transaction_type !== 'refund' && (
+                            <div>
+                                <Label>Total Amount</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Enter total amount"
+                                    value={data.total_amount}
+                                    onChange={(e) => setData('total_amount', e.target.value)}
+                                />
+                                <InputError message={errors.total_amount} />
+                            </div>
+                        )}
+        
+                        {data.transaction_type === 'refund' && (
+                            <div>
+                                <Label>Refund Amount</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Enter refund amount"
+                                    value={data.refund_amount}
+                                    onChange={(e) => setData('refund_amount', e.target.value)}
+                                />
+                                <InputError message={errors.refund_amount} />
+                            </div>
+                        )}
+        
+                        {data.transaction_type !== 'refund' && (
+                            <div>
+                                <Label>Payment Amount</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Enter paid amount"
+                                    value={data.paid_amount}
+                                    onChange={(e) => setData('paid_amount', e.target.value)}
+                                />
+                                <InputError message={errors.paid_amount} />
+                            </div>
+                        )}
+        
+                        {/* Payment Mode */}
+                        <div>
+                            <Label>Payment Mode</Label>
+                            <Select
+                                value={data.payment_mode}
+                                onValueChange={(val) => setData('payment_mode', val)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select payment mode" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Cash">Cash</SelectItem>
+                                    <SelectItem value="QR">QR</SelectItem>
+                                    <SelectItem value="Cash + QR">Cash + QR</SelectItem>
+                                    <SelectItem value="Cheque">Cheque</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError message={errors.payment_mode} />
+                        </div>
+        
+                        {/* Payment Date */}
+                        <div>
+                            <Label>Payment Date</Label>
+                            <Input
+                                type="date"
+                                value={data.payment_date}
+                                onChange={(e) => setData('payment_date', e.target.value)}
+                            />
+                            <InputError message={errors.payment_date} />
+                        </div>
+        
+                        {/* Optional Fields */}
+                        {data.transaction_type !== 'refund' && (
+                            <div className={data.transaction_type === 'credit-payment' ? 'col-span-full' : ''}>
+                                <Label>Bill Number (optional)</Label>
+                                <Input
+                                    placeholder="Enter bill number (if applicable)"
+                                    onChange={(e) => setData('bill_number', e.target.value)}
+                                />
+                                <InputError message={errors.bill_number} />
+                            </div>
+                        )}
+        
+                        {data.transaction_type === 'refund' && (
+                            <div className="col-span-full">
+                                <Label>Payment Voucher</Label>
+                                <Input
+                                    placeholder="Enter payment voucher number"
+                                    onChange={(e) => setData('payment_voucher', e.target.value)}
+                                />
+                                <InputError message={errors.payment_voucher} />
+                            </div>
+                        )}
+                    </div>
+        
+                    {/* Description Field */}
+                    <div>
+                        <Label>Description</Label>
+                        <Textarea
+                            placeholder="Enter description of the transaction"
+                            value={data.description}
+                            onChange={(e) => setData('description', e.target.value)}
+                        />
+                        <InputError message={errors.description} />
+                    </div>
+        
+                    {/* Submit Button */}
+                    <Button type="submit" className="mt-4 w-full" disabled={processing}>
+                        {processing ? 'Processing...' : 'Create Transaction'}
+                    </Button>
+                </form>
+            </DialogContent>
+        </Dialog>
+
         );
     };
 
@@ -190,7 +228,11 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                     </Card>
                     <Card className="bg-fuchsia-600">
                         <CardHeader>
-                            <CardTitle className="text-white">Rs {ledger.reduce((total, payment) => total + Number(payment.paid_amount), 0)}</CardTitle>
+                            <CardTitle className="text-white"> Rs {ledger.reduce((total, payment) => {
+                                const paidAmount = Number(payment.paid_amount) || 0;
+                                const refundAmount = Number(payment.refund_amount) || 0;
+                                return total + paidAmount - refundAmount;
+                            }, 0)}</CardTitle>
                             <CardDescription className="text-white/80">Total Paid Amount</CardDescription>
                         </CardHeader>
                     </Card>
@@ -216,7 +258,7 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                                     <TableHead className="text-center">Extra Disc.</TableHead>
                                     <TableHead className="text-center">Paid</TableHead>
                                     <TableHead className="text-center">Credit/Adv.</TableHead>
-                                    <TableHead className="text-center">Bill No.</TableHead>
+                                    <TableHead className="text-center">Bill/PV No.</TableHead>
                                     <TableHead className="text-center">Transaction Type</TableHead>
                                     <TableHead className="text-center">Payment Mode</TableHead>
                                     <TableHead className="text-center">Remarks</TableHead>
@@ -233,19 +275,19 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                                                 {/* Date in custom format */}
                                                 <TableCell>{format(new Date(l.payment_date || l.created_at), 'MMM d, yyyy')}</TableCell>
                                                 {/* Total Amount */}
-                                                <TableCell>{Number(l.net_amount) ? `Rs ${Number(l.net_amount)}` : '-'}</TableCell>
+                                                <TableCell>{Number(l.refund_amount) ? `Rs ${Number(l.refund_amount)}` : `Rs ${Number(l.net_amount)}`}</TableCell>
                                                 {/* Extra Discount */}
                                                 <TableCell>{l.extra_discount ? `Rs ${Number(l.extra_discount)}` : '-'}</TableCell>
                                                 {/* Paid Amount */}
                                                 <TableCell>{l.paid_amount ? `Rs ${Number(l.paid_amount)}` : '-'}</TableCell>
                                                 {/* Balance / Credit */}
                                                 <TableCell>
-                                                    <small className={"px-3 py-1 rounded-full text-white font-bold " + (dueAmount > 0 ? 'bg-red-500' : dueAmount < 0 ? 'bg-green-500' : 'text-black')}>
+                                                    {l.refund_amount ? `` : (<small className={"px-3 py-1 rounded-full text-white font-bold " + (dueAmount > 0 ? 'bg-red-500' : dueAmount < 0 ? 'bg-green-500' : 'text-black')}>
                                                         {dueAmount >= 0 ? `Rs ${dueAmount}` : `Rs ${Math.abs(dueAmount)}`}
-                                                    </small>
+                                                    </small>)}
                                                 </TableCell>
-                                                {/* Bill Number */}
-                                                <TableCell>{l.bill_number ? <Badge>{l.bill_number}</Badge> : '-'}</TableCell>
+                                                 {/* Bill Number */}
+                                                 <TableCell>{l.bill_number ? <Badge>{l.bill_number}</Badge> : <Badge>{l.payment_voucher}</Badge>}</TableCell>
                                                 {/* Transaction Type */}
                                                 <TableCell className="capitalize">
                                                     {l.type || 'Credit Added'}

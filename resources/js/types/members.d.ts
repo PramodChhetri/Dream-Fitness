@@ -13,6 +13,7 @@ interface Payment {
     locker_charge?: string;
     locker_discount?: string;
     paid_amount: string;
+    refund_amount?: string;
     net_amount: string;
     package_discount?: string;
     payment_date: string;
@@ -61,7 +62,6 @@ interface Member {
     emergency_person_phone: string;
     locker?: Locker;
     active_locker?: Locker;
-    refundAmount?: number;
 }
 
 interface PaginationLink {

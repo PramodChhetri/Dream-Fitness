@@ -97,22 +97,35 @@ class Member extends Model
         // Get all payments from the entry, renewals, locker, and miscellaneous transactions
         $entryPayments = $this->hasMany(EntryPayment::class)->get()->map(function ($payment) {
             $payment->type = 'entry'; // Mark as entry payment
+            $payment->refund_amount = 0;
             return $payment;
         });
 
         $renewals = $this->hasMany(MembershipRenewal::class)->get()->map(function ($payment) {
             $payment->type = 'renewal'; // Mark as renewal payment
+            $payment->refund_amount = 0;
             return $payment;
         });
 
         $lockerPayments = $this->hasMany(LockerPayment::class)->get()->map(function ($payment) {
             $payment->type = 'locker'; // Mark as locker payment
+            $payment->refund_amount = 0;
+
             return $payment;
         });
 
         $miscellaneousTransactions = $this->hasMany(Transaction::class)->get()->map(function ($payment) {
             $payment->type = $payment->transaction_type;
             $payment->net_amount = $payment->total_amount;
+            $payment->refund_amount = 0;
+            return $payment;
+        });
+
+
+        $refundTransactions = $this->hasMany(Refund::class)->get()->map(function ($payment) {
+            $payment->type = 'refund';
+            $payment->paid_amount = 0;
+
             return $payment;
         });
 
@@ -121,9 +134,15 @@ class Member extends Model
             ->concat($entryPayments)
             ->concat($renewals)
             ->concat($lockerPayments)
-            ->concat($miscellaneousTransactions);
+            ->concat($miscellaneousTransactions)
+            ->concat($refundTransactions);
 
-        // Sort by payment_date first, and then by created_at if payment_date is the same
-        return $allPayments->sortByDesc('created_at');
+        // Sort payments by date and time (descending order)
+        $sortedPayments = $allPayments->sortByDesc(function ($payment) {
+            return $payment->payment_date; // Sorting by updated_at field
+        });
+
+        // If you're working with a collection and want to return sorted data
+        return $sortedPayments;
     }
 }

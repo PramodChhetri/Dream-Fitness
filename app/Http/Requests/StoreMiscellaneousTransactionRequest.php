@@ -14,17 +14,27 @@ class StoreMiscellaneousTransactionRequest extends FormRequest
 
     public function rules()
     {
-        return [
+        $rules = [
             'member_id' => ['nullable', 'integer', 'required_without:name', 'exists:members,id'],
             'name' => ['nullable', 'string', 'max:255', 'required_without:member_id'],
             'transaction_type' => ['required', 'string'],
             'description' => ['nullable', 'string', 'max:500'],
-            'total_amount' => ['required', 'numeric', 'min:0'],
-            'paid_amount' => ['required', 'numeric', 'min:0'],
             'payment_date' => ['required', 'date'],
             'payment_mode' => ['required', 'string'],
             'bill_number' => ['nullable', 'string', 'max:255'],
         ];
+
+        if ($this->transaction_type === 'refund') {
+            $rules['refund_amount'] = ['required', 'numeric', 'min:0'];
+            $rules['payment_voucher'] = ['nullable', 'string', 'max:255'];
+        } else {
+            $rules['total_amount'] = ['required', 'numeric', 'min:0'];
+            $rules['paid_amount'] = ['required', 'numeric', 'min:0'];
+        }
+
+
+
+        return $rules;
     }
 
     public function messages()
@@ -41,7 +51,11 @@ class StoreMiscellaneousTransactionRequest extends FormRequest
             'payment_mode.required' => 'Payment mode is required.',
             'payment_mode.in' => 'Payment mode must be one of the following: cash, QR.',
             'bill_number.max' => 'Bill number can only be a maximum of 255 characters.',
-            'member_id.required_without' => 'Either member ID or name must be provided.', // New message for member_id
+            'member_id.required_without' => 'Either member ID or name must be provided.',
+            'refund_amount.required' => 'Refund amount is required for a refund transaction.',
+            'refund_amount.numeric' => 'Refund amount must be a valid number.',
+            'payment_voucher.required' => 'Payment voucher is required for a refund transaction.',
+            'payment_voucher.max' => 'Payment voucher can only be a maximum of 255 characters.',
         ];
     }
 
@@ -54,6 +68,7 @@ class StoreMiscellaneousTransactionRequest extends FormRequest
         $this->merge([
             'total_amount' => (float) $this->total_amount,
             'paid_amount' => (float) $this->paid_amount,
+            'refund_amount' => $this->refund_amount ? (float) $this->refund_amount : null,
         ]);
     }
 }
