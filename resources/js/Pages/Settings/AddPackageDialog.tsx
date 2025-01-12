@@ -12,6 +12,7 @@ const AddPackageDialog = () => {
     const accessControls = usePage().props.accessControls as AccessControl[];
     const [selectedAccessControls, setSelectedAccessControls] = useState<number[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
     // Using useForm from Inertia.js for form handling
     const { data, setData, post, processing, reset, errors } = useForm({
@@ -24,11 +25,25 @@ const AddPackageDialog = () => {
         discount_yearly: '',
     });
 
+
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        console.log({ ...data, access_control_ids: selectedAccessControls });
+        if (!data.package_name.trim()) errors.package_name = 'Package name is required.';
+        if (!data.admission_amount || isNaN(Number(data.admission_amount)) || Number(data.admission_amount) < 0)
+            errors.admission_amount = 'Admission amount must be a valid non-negative number.';
+        if (!data.months || isNaN(Number(data.months)) || Number(data.months) <= 0)
+            errors.months = 'Months must be a valid number greater than 0.';
+        if (data.monthly_amount && (isNaN(Number(data.monthly_amount)) || Number(data.monthly_amount) < 0))
+            errors.monthly_amount = 'Monthly amount must be a valid non-negative number.';
+        if (data.discount_quarterly && (isNaN(Number(data.discount_quarterly)) || Number(data.discount_quarterly) < 0))
+            errors.discount_quarterly = 'Quarterly discount must be a valid non-negative number.';
+        if (data.discount_half_yearly && (isNaN(Number(data.discount_half_yearly)) || Number(data.discount_half_yearly) < 0))
+            errors.discount_half_yearly = 'Half-yearly discount must be a valid non-negative number.';
+        if (data.discount_yearly && (isNaN(Number(data.discount_yearly)) || Number(data.discount_yearly) < 0))
+            errors.discount_yearly = 'Yearly discount must be a valid non-negative number.';
+
 
         router.post(route('settings.storePackage'), {
             ...data,
@@ -40,7 +55,7 @@ const AddPackageDialog = () => {
                 setIsOpen(false);
             },
             onError: () => {
-                toast({ title: 'Error', description: 'Failed to add package', variant: 'destructive' });
+                // toast({ title: 'Error', description: 'Failed to add package', variant: 'destructive' });
             },
         });
     };
@@ -86,7 +101,6 @@ const AddPackageDialog = () => {
                             id="months"
                             value={data.months}
                             onChange={(e) => setData('months', e.target.value)}
-                            placeholder="0.00"
                             type="number"
                             disabled={processing}
                         />
@@ -99,7 +113,6 @@ const AddPackageDialog = () => {
                             id="admission_amount"
                             value={data.admission_amount}
                             onChange={(e) => setData('admission_amount', e.target.value)}
-                            placeholder="0.00"
                             type="number"
                             disabled={processing}
                         />
@@ -112,7 +125,6 @@ const AddPackageDialog = () => {
                             id="monthly_amount"
                             value={data.monthly_amount}
                             onChange={(e) => setData('monthly_amount', e.target.value)}
-                            placeholder="0.00"
                             type="number"
                             disabled={processing}
                         />
@@ -124,7 +136,6 @@ const AddPackageDialog = () => {
                             id="discount_quarterly"
                             value={data.discount_quarterly}
                             onChange={(e) => setData('discount_quarterly', e.target.value)}
-                            placeholder="0.00"
                             type="number"
                             disabled={processing}
                         />
@@ -137,7 +148,6 @@ const AddPackageDialog = () => {
                             id="discount_half_yearly"
                             value={data.discount_half_yearly}
                             onChange={(e) => setData('discount_half_yearly', e.target.value)}
-                            placeholder="0.00"
                             type="number"
                             disabled={processing}
                         />
@@ -150,7 +160,6 @@ const AddPackageDialog = () => {
                             id="discount_yearly"
                             value={data.discount_yearly}
                             onChange={(e) => setData('discount_yearly', e.target.value)}
-                            placeholder="0.00"
                             type="number"
                             disabled={processing}
                         />

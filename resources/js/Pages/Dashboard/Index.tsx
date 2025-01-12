@@ -24,7 +24,8 @@ export default function Dashboard({
     expiredCount,
     todaysCredits,
     todaysPayments,
-    monthlyRevenue
+    monthlyRevenue, 
+    totalExpense,
 }: {
     auth: any,
     totalMembers: number,
@@ -37,7 +38,8 @@ export default function Dashboard({
     expiredCount: number,
     todaysCredits: any[],
     todaysPayments: any[],
-    monthlyRevenue: any
+    monthlyRevenue: any,
+    totalExpense: any,
 }) {
     const [selectedMonth, setSelectedMonth] = useState('jan'); // Default to January
 
@@ -123,7 +125,7 @@ export default function Dashboard({
             </div>
 
             <div>
-                <RevenueChart monthlyRevenue={monthlyRevenue} />
+                <RevenueChart monthlyRevenue={monthlyRevenue} totalExpense={totalExpense}/>
             </div>
 
             <div className="grid grid-cols-2 max-[1356px]:grid-cols-1 gap-5">

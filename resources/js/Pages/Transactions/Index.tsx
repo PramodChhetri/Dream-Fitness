@@ -379,8 +379,8 @@ function renderMiscellaneousTable(data: any) {
                                 transaction.name ||
                                 transaction.member?.name
                             }</TableCell>
-                            <TableCell>Rs {transaction.total_amount}</TableCell>
-                            <TableCell>Rs {transaction.paid_amount}</TableCell>
+                            <TableCell>Rs {Number(transaction.total_amount)}</TableCell>
+                            <TableCell>Rs {Number(transaction.paid_amount)}</TableCell>
                             <TableCell>Rs {transaction.total_amount - transaction.paid_amount}</TableCell>
                             <TableCell>{transaction.transaction_type}</TableCell>
                             <TableCell>
@@ -427,7 +427,7 @@ function renderRefundTable(data: any) {
                             <TableCell>{
                                 transaction.member?.name
                             }</TableCell>
-                            <TableCell>Rs {transaction.refund_amount}</TableCell>
+                            <TableCell>Rs {Number(transaction.refund_amount)}</TableCell>
                             <TableCell>
                                 <Badge>
                                     {transaction.payment_voucher || 'N/A'}
@@ -460,7 +460,7 @@ function renderExpenseTable(data: any) {
                         <TableHead>Date</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Expense Amount</TableHead>
-                        <TableHead>Transaction Type</TableHead>
+                        <TableHead>Expense Type</TableHead>
                         <TableHead>PV No.</TableHead>
                         <TableHead>Payment Mode</TableHead>
                         <TableHead>Description</TableHead>
@@ -471,10 +471,10 @@ function renderExpenseTable(data: any) {
                         <TableRow key={transaction.id}>
                             <TableCell>{format(new Date(transaction.payment_date).toLocaleDateString(), 'yyyy-MM-dd')}</TableCell>
                             <TableCell>{
-                                transaction.member?.name
+                                transaction.name
                             }</TableCell>
-                            <TableCell>Rs {transaction.expense_amount}</TableCell>
-                            <TableCell>{transaction.transaction_type}</TableCell>
+                            <TableCell>Rs {Number(transaction.expense_amount)}</TableCell>
+                            <TableCell>{transaction.expense_type}</TableCell>
                             <TableCell>
                                 <Badge>
                                     {transaction.payment_voucher || 'N/A'}

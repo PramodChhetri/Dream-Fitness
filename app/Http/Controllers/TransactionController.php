@@ -42,7 +42,7 @@ class TransactionController extends Controller
                 $query = Refund::with('member');
                 break;
             case 'expenses':
-                $query = Expense::with('member');
+                $query = Expense::query();
                 break;
             default:
                 $query = EntryPayment::with('member.membershipPackage');
@@ -90,7 +90,6 @@ class TransactionController extends Controller
 
         if ($data['transaction_type'] === 'refund') {
             return DB::transaction(function () use ($data) {
-                $data['payment_date'] = Carbon::now();
 
                 $totalRefundAmount = $data['refund_amount'];
                 $member = Member::findOrFail($data['member_id']);
@@ -157,10 +156,15 @@ class TransactionController extends Controller
 
                 return redirect()->back()->with('success', 'Refund transaction completed successfully.');
             });
+        } else if ($data['transaction_type']  === 'expense') {
+            return DB::transaction(function () use ($data) {
+                $transaction = Expense::create($data);
+
+                return redirect()->back()->with('success', 'Expense transaction created successfully.');
+            });
         } else {
             // Handle other transaction types
             return DB::transaction(function () use ($data) {
-                $data['payment_date'] = Carbon::now();
                 $data['remarks'] = $data['description'] ?? '';
 
                 $transaction = Transaction::create($data);

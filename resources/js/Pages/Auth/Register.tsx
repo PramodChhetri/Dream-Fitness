@@ -41,7 +41,12 @@ export default function Register() {
                         className="mt-1 block w-full"
                         autoComplete="name"
                         isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
+                        onChange={(e) => {
+                            const formattedValue = e.target.value
+                                .toLowerCase()
+                                .replace(/\b\w/g, (char) => char.toUpperCase());
+                            setData('name', formattedValue);
+                        }}
                         required
                     />
 

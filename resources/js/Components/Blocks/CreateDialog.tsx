@@ -119,7 +119,12 @@ const MembershipCreationDialog = () => {
                                                 <Input
                                                     id="name"
                                                     value={data.name}
-                                                    onChange={e => setData('name', e.target.value)}
+                                                    onChange={(e) => {
+                                                        const formattedValue = e.target.value
+                                                            .toLowerCase()
+                                                            .replace(/\b\w/g, (char) => char.toUpperCase());
+                                                        setData('name', formattedValue);
+                                                    }}
                                                     placeholder="Enter member's name"
                                                     required
                                                 />
@@ -302,7 +307,12 @@ const MembershipCreationDialog = () => {
                                             <Input
                                                 id="emergency_person_name"
                                                 value={data.emergency_person_name}
-                                                onChange={e => setData('emergency_person_name', e.target.value)}
+                                                onChange={(e) => {
+                                                    const formattedValue = e.target.value
+                                                        .toLowerCase()
+                                                        .replace(/\b\w/g, (char) => char.toUpperCase());
+                                                    setData('emergency_person_name', formattedValue);
+                                                }}
                                                 placeholder="Enter emergency contact person name"
                                             />
                                             <InputError message={errors.emergency_person_name} className="mt-2" />

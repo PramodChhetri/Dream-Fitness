@@ -98,7 +98,7 @@ class SettingsController extends Controller
       // Validate the incoming request data
       $validated = $request->validate([
          'package_name' => 'required|string|max:255|unique:membership_packages,package_name',
-         'admission_amount' => 'nullable|numeric',
+         'admission_amount' => 'required|numeric',
          'months' => 'required|numeric',
          'monthly_amount' => 'nullable|numeric',
          'discount_quarterly' => 'nullable|numeric',
@@ -112,10 +112,10 @@ class SettingsController extends Controller
          'package_name' => $validated['package_name'],
          'admission_amount' => $validated['admission_amount'],
          'months' => $validated['months'],
-         'monthly_amount' => $validated['monthly_amount'],
-         'discount_quarterly' => $validated['discount_quarterly'],
-         'discount_half_yearly' => $validated['discount_half_yearly'],
-         'discount_yearly' => $validated['discount_yearly'],
+         'monthly_amount' => $validated['monthly_amount'] ? $validated['monthly_amount'] : 0,
+         'discount_quarterly' => $validated['discount_quarterly'] ? $validated['discount_quarterly'] : 0,
+         'discount_half_yearly' => $validated['discount_half_yearly'] ? $validated['discount_half_yearly'] : 0,
+         'discount_yearly' => $validated['discount_yearly'] ? $validated['discount_yearly'] : 0,
          'access_control_ids' => json_encode($validated['access_control_ids']),
       ]);
 
@@ -149,10 +149,10 @@ class SettingsController extends Controller
          'package_name' => $validated['package_name'],
          'admission_amount' => $validated['admission_amount'],
          'months' => $validated['months'],
-         'monthly_amount' => $validated['monthly_amount'],
-         'discount_quarterly' => $validated['discount_quarterly'],
-         'discount_half_yearly' => $validated['discount_half_yearly'],
-         'discount_yearly' => $validated['discount_yearly'],
+         'monthly_amount' => $validated['monthly_amount'] ? $validated['monthly_amount'] : 0,
+         'discount_quarterly' => $validated['discount_quarterly'] ? $validated['discount_quarterly'] : 0,
+         'discount_half_yearly' => $validated['discount_half_yearly'] ? $validated['discount_half_yearly'] : 0,
+         'discount_yearly' => $validated['discount_yearly'] ? $validated['discount_yearly'] : 0,
          'access_control_ids' => json_encode($validated['access_control_ids']),
       ]);
 

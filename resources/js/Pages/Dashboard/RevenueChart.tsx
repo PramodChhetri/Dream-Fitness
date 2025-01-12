@@ -12,6 +12,7 @@ interface RevenueSource {
     membership_renewals: number | string;
     locker_payments: number | string;
     miscellaneous_payments: number | string;
+    refunds: number | string;
 }
 
 interface GenderBreakdown {
@@ -43,16 +44,18 @@ interface MonthlyRevenue {
 
 interface RevenueChartProps {
     monthlyRevenue: MonthlyRevenue;
+    totalExpense: any;
 }
 
 const sourceMap: { [key: string]: string } = {
     'entry_payments': "Admissions",
     'membership_renewals': "Renewals",
     'locker_payments': "Lockers",
-    'miscellaneous_payments': "Miscellaneous"
+    'miscellaneous_payments': "Miscellaneous",
+    'refunds' : 'Refunds'
 };
 
-const RevenueChart: React.FC<RevenueChartProps> = ({ monthlyRevenue }) => {
+const RevenueChart: React.FC<RevenueChartProps> = ({ monthlyRevenue, totalExpense }) => {
     // Extract the keys (months) from the `monthlyRevenue` object dynamically
     const monthOptions = Object.keys(monthlyRevenue).map(monthKey => ({
         label: monthKey, // Example: "Jan 2024"
@@ -77,6 +80,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ monthlyRevenue }) => {
     const totalMembershipRenewals = revenuesByDay.reduce((acc, curr) => Number(acc) + Number(curr.source.membership_renewals), 0)
     const totalLockerRevenue = revenuesByDay.reduce((acc, curr) => Number(acc) + Number(curr.source.locker_payments), 0)
     const totalMiscellaneousRevenue = revenuesByDay.reduce((acc, curr) => Number(acc) + Number(curr.source.miscellaneous_payments), 0)
+    const totalRefunds = revenuesByDay.reduce((acc, curr) => Number(acc) + Number(curr.source.refunds), 0)
 
     const totalMaleCount = revenuesByDay.reduce((acc, curr) => Number(acc) + Number(curr.gender.male), 0);
     const totalFemaleCount = revenuesByDay.reduce((acc, curr) => Number(acc) + Number(curr.gender.female), 0);
@@ -128,10 +132,19 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ monthlyRevenue }) => {
                         <strong className="text-sm text-muted-foreground">
                             Miscellaneous: <strong className='text-card-foreground'>Rs {Number(totalMiscellaneousRevenue).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong>
                         </strong>
+                        <strong className="text-sm text-muted-foreground">
+                            Refunds: <strong className='text-card-foreground'>Rs {Number(totalRefunds).toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong>
+                        </strong>
+                    </button>
+                    <button data-active={true} className="relative z-30 flex grow flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6 w-[fit]">
+                        <strong className="text-xs text-muted-foreground">Total Expenses</strong>
+                        <span className="text-lg text-red-500 font-bold leading-none sm:text-3xl">
+                            Rs {Number(totalExpense).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                        </span>
                     </button>
                     <button data-active={true} className="relative z-30 flex grow flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6 w-[fit]">
                         <strong className="text-xs text-muted-foreground">Total Revenue</strong>
-                        <span className="text-lg font-bold leading-none sm:text-3xl">
+                        <span className="text-lg text-green-500 font-bold leading-none sm:text-3xl">
                             Rs {Number(totalRevenue).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </span>
                         <Popover>
@@ -184,9 +197,12 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ monthlyRevenue }) => {
                 </div>
             </CardHeader>
             <CardContent className="px-2 sm:p-6">
-                <ChartContainer config={chartConfig} className="aspect-auto h-[350px] w-full">
-                    <BarChart data={revenuesByDay} margin={{ left: 12, right: 12 }} className='w-[30px]'>
-                        <CartesianGrid vertical={false} />
+                <ChartContainer config={chartConfig} className="overflow-visible aspect-auto h-[350px] w-full">
+                <BarChart 
+                    data={revenuesByDay} 
+                    margin={{ top: 20, right: 12, left: 12, bottom: 20 }}
+                >
+
                         <XAxis
                             dataKey="date"
                             tickLine={false}
@@ -268,14 +284,14 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ monthlyRevenue }) => {
                             }}
                         />
                         <Bar dataKey="revenue" fill={`var(--color-revenue)`}>
-                            <LabelList
-                                position="top"
-                                offset={12}
-                                className="fill-foreground"
+                        <LabelList
+                                position="top" 
+                                offset={10} 
+                                className="fill-foreground" 
                                 fontSize={12}
-                                formatter={(value: string | number) => {
-                                    return Number(value) > 0 ? Number(value).toLocaleString('en-In', { maximumFractionDigits: 2 }) : '';
-                                }}
+                                formatter={(value: string | number) => 
+                                    Number(value) > 0 ? Number(value).toLocaleString('en-In', { maximumFractionDigits: 2 }) : ''
+                                }
                             />
                         </Bar>
                     </BarChart>

@@ -13,11 +13,14 @@ const TransactionDialog = () => {
     const { data, setData, errors, post, processing, reset } = useForm({
         name: '',
         transaction_type: '',
+        expense_type: '',
         description: '',
         total_amount: '',
         paid_amount: '',
+        expense_amount: '',
         payment_date: '',
         payment_mode: '',
+        payment_voucher: '',
         bill_number: '',
     });
 
@@ -51,42 +54,70 @@ const TransactionDialog = () => {
                     <DialogDescription>Create miscellaneous transactions for non-registered or registered members.</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    {/* Non-member Name */}
+
+
+
                     <div className="grid grid-cols-1 gap-4">
-                        <div>
-                            <Label>Person Name</Label>
+                    <div>
+                        <Label>Transaction Type</Label>
+                        <Select
+                            value={data.transaction_type}
+                            onValueChange={(val) => setData('transaction_type', val)}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select transaction type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="service">Service</SelectItem>
+                                <SelectItem value="product">Product</SelectItem>
+                                <SelectItem value="expense">Expense</SelectItem>
+                                <SelectItem value="others">Others</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <InputError message={errors.transaction_type} />
+                    </div>
+                        
+                        {data.transaction_type != 'expense' ? (<div>
+                            <Label>Name</Label>
                             <Input
                                 required
                                 placeholder="Enter Full Name of a person"
                                 value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
+                                onChange={(e) => {
+                                    const formattedValue = e.target.value
+                                        .toLowerCase()
+                                        .replace(/\b\w/g, (char) => char.toUpperCase());
+                                    setData('name', formattedValue);
+                                }}
+                            />
+                            <InputError message={errors.name} />
+                        </div>) : (
+                            <div>
+                            <Label>Title</Label>
+                            <Input
+                                required
+                                placeholder="Enter title"
+                                value={data.name}
+                                onChange={(e) => {
+                                    const formattedValue = e.target.value
+                                        .toLowerCase()
+                                        .replace(/\b\w/g, (char) => char.toUpperCase());
+                                    setData('name', formattedValue);
+                                }}
                             />
                             <InputError message={errors.name} />
                         </div>
+                        )}
+
+
+                        
                     </div>
 
-                    {/* Grid layout for smaller fields */}
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <Label>Transaction Type</Label>
-                            <Select
-                                value={data.transaction_type}
-                                onValueChange={(val) => setData('transaction_type', val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select transaction type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="service">Service</SelectItem>
-                                    <SelectItem value="product">Product</SelectItem>
-                                    <SelectItem value="refund">Refund</SelectItem>
-                                    <SelectItem value="others">Others</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.transaction_type} />
-                        </div>
 
-                        <div>
+                        {data.transaction_type != 'expense' ? (
+                            <>
+                            <div>
                             <Label>Total Amount</Label>
                             <Input
                                 type="number"
@@ -95,7 +126,7 @@ const TransactionDialog = () => {
                                 onChange={(e) => setData('total_amount', e.target.value)}
                             />
                             <InputError message={errors.total_amount} />
-                        </div>
+                            </div>
 
                         <div>
                             <Label>Paid Amount</Label>
@@ -107,6 +138,41 @@ const TransactionDialog = () => {
                             />
                             <InputError message={errors.paid_amount} />
                         </div>
+                            </>
+                        ) : (<div>
+                            <Label>Expense Amount</Label>
+                            <Input
+                                type="number"
+                                placeholder="Enter expense amount"
+                                value={data.expense_amount}
+                                onChange={(e) => setData('expense_amount', e.target.value)}
+                            />
+                            <InputError message={errors.expense_amount} />
+                            </div>)}
+
+                            {data.transaction_type == 'expense' && (
+                                <div>
+                                <Label>Expense Type</Label>
+                                <Select
+                                    value={data.expense_type}
+                                    onValueChange={(val) => setData('expense_type', val)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select expense type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="wages">Wages</SelectItem>
+                                        <SelectItem value="rent">Rent</SelectItem>
+                                        <SelectItem value="marketing">Marketing</SelectItem>
+                                        <SelectItem value="maintenanace">Maintenanace</SelectItem>
+                                        <SelectItem value="stationary">Stationary</SelectItem>
+                                        <SelectItem value="equipment">Equipment</SelectItem>
+                                        <SelectItem value="others">Others</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.expense_type} />
+                            </div>
+                            )}
 
                         <div>
                             <Label>Payment Mode</Label>
@@ -137,18 +203,34 @@ const TransactionDialog = () => {
                             <InputError message={errors.payment_date} />
                         </div>
 
-                        <div>
+
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 mt-4">
+                    {data.transaction_type != 'expense' ? (
+                            <div>
                             <Label>Bill Number (optional)</Label>
                             <Input
                                 placeholder="Enter bill number (if applicable)"
                                 onChange={(e) => setData('bill_number', e.target.value)}
                             />
                             <InputError message={errors.bill_number} />
+                            </div>
+                         ):(
+                        <div>
+                            <Label>Payment Voucher (optional)</Label>
+                            <Input
+                                placeholder="Enter payment voucher number (if applicable)"
+                                onChange={(e) => setData('payment_voucher', e.target.value)}
+                            />
+                            <InputError message={errors.payment_voucher} />
                         </div>
-                    </div>
+                         )}
+                         </div>
 
                     {/* Full-width for larger fields */}
-                    <div className="grid grid-cols-1 gap-4 mt-4">
+                    {data.transaction_type != 'expense' && (
+                        <div className="grid grid-cols-1 gap-4 mt-4">
                         <div>
                             <Label>Description</Label>
                             <Textarea
@@ -159,6 +241,7 @@ const TransactionDialog = () => {
                             <InputError message={errors.description} />
                         </div>
                     </div>
+                    )}
 
                     {/* Submit Button */}
                     <Button type="submit" className="mt-4 w-full" disabled={processing}>

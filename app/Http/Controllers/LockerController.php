@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Locker;
 use App\Models\Member;
 use App\Models\MemberLocker;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -42,10 +43,12 @@ class LockerController extends Controller
                 'locker_discount' => $discount,
                 'bill_number' => $validatedData['bill_number'],
                 'payment_mode' => $validatedData['payment_mode'],
-                'payment_date' => now(),
+                'payment_date' => Carbon::now(),
                 'active_till' => $endDate,
                 'paid_amount' => $paidAmount,
                 'net_amount' => $totalAmount,
+                'updated_at' => Carbon::now(),
+                'created_at' => Carbon::now(),
                 'is_approved' => true
             ]);
 
@@ -104,9 +107,11 @@ class LockerController extends Controller
                 'locker_discount' => $discount,
                 'bill_number' => $validatedData['bill_number'],
                 'payment_mode' => $validatedData['payment_mode'],
-                'payment_date' => now(),
+                'payment_date' => Carbon::now(),
                 'active_till' => $endDate,
                 'paid_amount' => $paidAmount,
+                'updated_at' => Carbon::now(),
+                'created_at' => Carbon::now(),
                 'net_amount' => $totalAmount,
                 'is_approved' => true
             ]);

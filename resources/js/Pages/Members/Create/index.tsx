@@ -160,7 +160,12 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
                                             <Input
                                                 id="name"
                                                 value={data.name}
-                                                onChange={e => setData('name', e.target.value)}
+                                                onChange={(e) => {
+                                                    const formattedValue = e.target.value
+                                                        .toLowerCase()
+                                                        .replace(/\b\w/g, (char) => char.toUpperCase());
+                                                    setData('name', formattedValue);
+                                                }}
                                                 placeholder="Enter member's name"
                                                 required
                                             />

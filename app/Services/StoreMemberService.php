@@ -66,6 +66,7 @@ class StoreMemberService
 
     private function createEntryPayment(Member $member, array $validatedData, float $credit)
     {
+        $validatedData['payment_date'] = Carbon::parse($member->start_date)->setTime(now()->hour, now()->minute, now()->second);
         return EntryPayment::create([
             'member_id' => $member->id,
             'admission_fees' => $validatedData['admission_fees'],
@@ -79,7 +80,7 @@ class StoreMemberService
             'paid_amount' => $validatedData['paid'],
             'net_amount' => $validatedData['amount'],
             'package_discount' => $validatedData['package_discount'],
-            $data['payment_date'] = Carbon::parse($member->start_date)->setTime(now()->hour, now()->minute, now()->second),
+            'payment_date' => $validatedData['payment_date'],
             'bill_number' => $validatedData['bill_number'],
             'active_till' => Carbon::parse($member->start_date)->addMonths((int) $validatedData['months'])->format('Y-m-d'),
             'payment_proof' => $validatedData['payment_proof'] ?? null,

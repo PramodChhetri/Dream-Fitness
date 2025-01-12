@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\ExtraCredit;
 use App\Models\Member;
 use App\Models\EntryPayment;
+use App\Models\Expense;
 use App\Models\LockerPayment;
 use App\Models\MembershipRenewal;
+use App\Models\Refund;
 use App\Models\RegistrationApplication;
 use App\Models\RenewalApplication;
 use App\Models\Transaction;
@@ -30,18 +32,27 @@ class DashboardController extends Controller
         // Total Pending Renewal Approvals (membership renewals awaiting approval)
         $pendingRenewalApprovals = RenewalApplication::count();
 
-        // Today's Revenue (from all payment types)
-        $todaysRevenue = EntryPayment::whereDate('payment_date', now())
-            ->where('is_approved', true)
-            ->sum('paid_amount') +
-            MembershipRenewal::whereDate('payment_date', now())
-            ->where('is_approved', true)
-            ->sum('paid_amount') +
-            LockerPayment::whereDate('payment_date', now())
-            ->where('is_approved', true)
-            ->sum('paid_amount') +
-            Transaction::whereDate('payment_date', now())
-            ->sum('paid_amount');
+        $todaysRevenue = collect([
+            EntryPayment::whereDate('payment_date', Carbon::today())
+                ->where('is_approved', 1)
+                ->sum('paid_amount'),
+            MembershipRenewal::whereDate('payment_date', Carbon::today())
+                ->where('is_approved', 1)
+                ->sum('paid_amount'),
+            LockerPayment::whereDate('payment_date', Carbon::today())
+                ->where('is_approved', 1)
+                ->sum('paid_amount'),
+            Transaction::whereDate('payment_date', Carbon::today())
+                ->sum('paid_amount'),
+        ])->sum() - Refund::whereDate('payment_date', Carbon::today())
+            ->sum('refund_amount');
+
+        $currentDate = Carbon::now();
+        $startOfMonth = $currentDate->startOfMonth()->toDateString();
+        $endOfMonth = $currentDate->endOfMonth()->toDateString();
+
+        $totalExpense = Expense::whereBetween('payment_date', [$startOfMonth, $endOfMonth])->sum('expense_amount');
+
 
         // Today's Registrations (from entry payments)
         $todaysRegistrations = EntryPayment::whereDate('payment_date', now())
@@ -54,6 +65,7 @@ class DashboardController extends Controller
             ->where('is_approved', true)
             ->with('member.membershipPackage')
             ->get();
+
 
         // Count of Expired Members
         $expiredCount = Member::where('payment_expiry_date', '<=', now()->toDateString())->count();
@@ -111,6 +123,16 @@ class DashboardController extends Controller
                 ->groupBy(DB::raw('DATE(payment_date)'))
                 ->get();
 
+            // Get daily refund data
+            $refunds = DB::table('refunds')
+                ->select(
+                    DB::raw('DATE(payment_date) as date'),
+                    DB::raw('SUM(refund_amount) as refund_revenue')
+                )
+                ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+                ->groupBy(DB::raw('DATE(payment_date)'))
+                ->get();
+
             // Fill missing days with zero revenue
             $dates = collect();
             for ($j = 1; $j <= $endOfMonth->day; $j++) {
@@ -123,6 +145,7 @@ class DashboardController extends Controller
                         'membership_renewals' => 0,
                         'locker_payments' => 0,
                         'miscellaneous_payments' => 0,
+                        'refunds' => 0,
                     ],
                     'gender' => [
                         'male' => 0,
@@ -168,8 +191,8 @@ class DashboardController extends Controller
                 }
             }
 
-            // Add miscellaneous data
-            foreach($miscellaneousPayments as $miscellaneous) {
+            // Add miscellaneous payments data
+            foreach ($miscellaneousPayments as $miscellaneous) {
                 if ($dates->has($miscellaneous->date)) {
                     $existing = $dates->get($miscellaneous->date);
                     $existing['revenue'] += $miscellaneous->transaction_revenue;
@@ -178,9 +201,20 @@ class DashboardController extends Controller
                 }
             }
 
+            // Add refund data and subtract it from the revenue
+            foreach ($refunds as $refund) {
+                if ($dates->has($refund->date)) {
+                    $existing = $dates->get($refund->date);
+                    $existing['revenue'] -= $refund->refund_revenue; // Subtract refund amount
+                    $existing['source']['refunds'] = $refund->refund_revenue; // Store refund data
+                    $dates->put($refund->date, $existing);
+                }
+            }
+
             // Add formatted monthly data to the array with the month label
             $monthlyRevenue[$monthLabel] = $dates->values();
         }
+
 
         // Render view with Inertia and pass the data
         return Inertia::render('Dashboard/Index', [
@@ -195,6 +229,7 @@ class DashboardController extends Controller
             'todaysCredits' => $todaysCredits,
             'todaysPayments' => $todaysPayments,
             'monthlyRevenue' => $monthlyRevenue, // Return monthly revenues for each day
+            'totalExpense' => $totalExpense,
         ]);
     }
 

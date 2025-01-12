@@ -24,8 +24,8 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
 
     // Ensure that sorting considers all dates correctly
     ledger.sort((a: any, b: any) => {
-        const dateA = new Date(a.payment_date || a.created_at);
-        const dateB = new Date(b.payment_date || b.created_at);
+        const dateA = new Date(a.updated_at || a.created_at);
+        const dateB = new Date(b.updated_at || b.created_at);
         return dateB.getTime() - dateA.getTime(); // Sort from newest to oldest
     });
 
@@ -298,7 +298,7 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                                                 {/* Payment Mode */}
                                                 <TableCell>{l.payment_mode || '-'}</TableCell>
                                                 {/* Remarks */}
-                                                <TableCell>{l.remarks || '-'}</TableCell>
+                                                <TableCell>{l.description || '-'}</TableCell>
                                             </TableRow>
                                         );
                                     })
