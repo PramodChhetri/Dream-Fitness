@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\IncomeExpenseExport;
 use App\Http\Requests\StoreMiscellaneousTransactionRequest;
 use App\Models\EntryPayment;
 use App\Models\Expense;
 use App\Models\LockerPayment;
 use App\Models\Member;
 use App\Models\MembershipRenewal;
+use App\Models\Official;
+use App\Models\OfficialTransaction;
 use App\Models\Refund;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -210,5 +214,86 @@ class TransactionController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+    public function exportTransactions(Request $request)
+    {
+
+        $startDate = $request->input('startDate'); // Get start date from request
+        $endDate = $request->input('endDate');    // Get end date from request
+
+        // Income Transactions
+        $serviceTransactions = Transaction::where('transaction_type', 'service')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $productTransactions = Transaction::where('transaction_type', 'product')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $otherTransactions = Transaction::where('transaction_type', 'others')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $renewalPayments = MembershipRenewal::whereBetween('payment_date', [$startDate, $endDate])->get();
+        $entryPayments = EntryPayment::whereBetween('payment_date', [$startDate, $endDate])->get();
+        $lockerPayments = LockerPayment::whereBetween('payment_date', [$startDate, $endDate])->get();
+
+        // Net Income Amount
+        $netServiceTransaction = $serviceTransactions->sum('total_amount');
+        $netProductTransaction = $productTransactions->sum('total_amount');
+        $netOtherTransaction = $otherTransactions->sum('total_amount');
+        $netMiscellaneousTransaction = $netServiceTransaction + $netProductTransaction + $netOtherTransaction;
+        $netRenewalPayments = $renewalPayments->sum('net_amount');
+        $netEntryPayments = $entryPayments->sum('net_amount');
+        $netLockerPayments = $lockerPayments->sum('net_amount');
+
+        $totalIncome = $netMiscellaneousTransaction + $netEntryPayments + $netLockerPayments + $netRenewalPayments;
+
+        // Expense Transactions
+        $officialSalaryTransactions = OfficialTransaction::where('transaction_type', 'salary_payment')->whereBetween('transaction_date', [$startDate, $endDate])->get();
+        $officialAdvanceSalaryTransactions = OfficialTransaction::where('transaction_type', 'advance_payment')->whereBetween('transaction_date', [$startDate, $endDate])->get();
+        $officialBonusTransactions = OfficialTransaction::where('transaction_type', 'bonus')->whereBetween('transaction_date', [$startDate, $endDate])->get();
+        $refunds = Refund::whereBetween('payment_date', [$startDate, $endDate])->get();
+        $wageExpenses = Expense::where('expense_type', 'wages')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $rentExpenses = Expense::where('expense_type', 'rent')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $marketingExpenses = Expense::where('expense_type', 'marketing')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $maintenanceExpenses = Expense::where('expense_type', 'maintenance')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $stationaryExpenses = Expense::where('expense_type', 'stationary')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $equipmentExpenses = Expense::where('expense_type', 'equipment')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $utilityExpenses = Expense::where('expense_type', 'utility')->whereBetween('payment_date', [$startDate, $endDate])->get();
+        $otherExpenses = Expense::where('expense_type', 'others')->whereBetween('payment_date', [$startDate, $endDate])->get();
+
+        // Net Expense Amount
+        $netOfficialSalaryTransactions = $officialSalaryTransactions->sum('amount') + $officialAdvanceSalaryTransactions->sum('amount') + $officialBonusTransactions->sum('amount');
+        $netWageExpenses = $wageExpenses->sum('expense_amount');
+        $netRentExpenses = $rentExpenses->sum('expense_amount');
+        $netMarketingExpenses = $marketingExpenses->sum('expense_amount');
+        $netMaintenanceExpenses = $maintenanceExpenses->sum('expense_amount');
+        $netStationaryExpenses = $stationaryExpenses->sum('expense_amount');
+        $netEquipmentExpenses = $equipmentExpenses->sum('expense_amount');
+        $netUtilityExpenses = $utilityExpenses->sum('expense_amount');
+        $netOtherExpenses = $otherExpenses->sum('expense_amount');
+        $netRefunds = $refunds->sum('refund_amount');
+
+        $totalExpense = $netOfficialSalaryTransactions + $netWageExpenses + $netRentExpenses + $netMarketingExpenses + $netMaintenanceExpenses + $netStationaryExpenses + $netEquipmentExpenses + $netUtilityExpenses + $netOtherExpenses + $netRefunds;
+
+        $data = [
+            'netMiscellaneousTransaction' => $netMiscellaneousTransaction,
+            'netEntryPayments' => $netEntryPayments,
+            'netRenewalPayments' => $netRenewalPayments,
+            'netLockerPayments' => $netLockerPayments,
+            'netOfficialSalaryTransactions' => $netOfficialSalaryTransactions,
+            'netWageExpenses' => $netWageExpenses,
+            'netRentExpenses' => $netRentExpenses,
+            'netMarketingExpenses' => $netMarketingExpenses,
+            'netMaintenanceExpenses' => $netMaintenanceExpenses,
+            'netStationaryExpenses' => $netStationaryExpenses,
+            'netEquipmentExpenses' => $netEquipmentExpenses,
+            'netUtilityExpenses' => $netUtilityExpenses,
+            'netOtherExpenses' => $netOtherExpenses,
+            'netRefunds' => $netRefunds,
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
+            'netIncome' => $totalIncome - $totalExpense,
+        ];
+
+        $filename = "income-expense-statement-{$startDate}-to-{$endDate}.xlsx";
+
+        $gymName = env('GYM_NAME', 'GYM');
+
+        return Excel::download(new IncomeExpenseExport($data, $gymName, $startDate, $endDate), $filename);
     }
 }

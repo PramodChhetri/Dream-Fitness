@@ -8,6 +8,7 @@ use App\Models\EntryPayment;
 use App\Models\Expense;
 use App\Models\LockerPayment;
 use App\Models\MembershipRenewal;
+use App\Models\OfficialTransaction;
 use App\Models\Refund;
 use App\Models\RegistrationApplication;
 use App\Models\RenewalApplication;
@@ -51,8 +52,13 @@ class DashboardController extends Controller
         $startOfMonth = $currentDate->startOfMonth()->toDateString();
         $endOfMonth = $currentDate->endOfMonth()->toDateString();
 
-        $totalExpense = Expense::whereBetween('payment_date', [$startOfMonth, $endOfMonth])->sum('expense_amount');
+        $totalExpenseAmount = Expense::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+            ->sum('expense_amount');
 
+        $totalSalaryAmount = OfficialTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        $totalExpense = $totalExpenseAmount + $totalSalaryAmount;
 
         // Today's Registrations (from entry payments)
         $todaysRegistrations = EntryPayment::whereDate('payment_date', now())
@@ -233,7 +239,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    // Helper function to get membership package data for a specific day
     // Helper function to get membership package data for a specific day with count and sum
     protected function getMembershipPackageDataForDay($date)
     {

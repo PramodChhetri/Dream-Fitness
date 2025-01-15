@@ -110,6 +110,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Transaction for Member
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions/store', [TransactionController::class, 'store'])->name('transactions.store');
+    // Exporting transaction statement
+    Route::post('/export-transactions', [TransactionController::class, 'exportTransactions']);
 
     Route::post('/member/{member}/locker/{locker}', [LockerController::class, 'storeLocker'])->name('locker.store');
     Route::put('/member/{member}/locker/{locker}', [LockerController::class, 'updateLocker'])->name('locker.update');

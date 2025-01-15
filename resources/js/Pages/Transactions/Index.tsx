@@ -11,10 +11,11 @@ import { Loader } from '@/Components/loader'; // Add a loader component (or crea
 import TransactionDialog from './TransactionDialog';
 import { Badge } from '@/Components/ui/badge';
 import { format } from 'date-fns';
-import { FilterIcon } from 'lucide-react';
+import { Download, FilterIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
+import axios from 'axios';
 
 export default function Transactions({ auth, data, activeTab }: PageProps<{ data: any; activeTab: string }>) {
     const [currentTab, setCurrentTab] = useState(activeTab || 'registrations');
@@ -113,6 +114,69 @@ export default function Transactions({ auth, data, activeTab }: PageProps<{ data
         );
     };
 
+    const ExportTransaction = () => 
+        {
+            const { data, setData, post, processing } = useForm({
+                startDate: '',
+                endDate: '',
+            });
+        
+            const handleSubmit = async (e : any) => {
+                e.preventDefault();
+                try {
+                    const response = await axios.post('/export-transactions', {
+                        startDate: data.startDate,
+                        endDate: data.endDate,
+                    }, {
+                        responseType: 'blob', // Important for handling file download
+                    });
+            
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `income-expense-statement-${data.startDate}-to-${data.endDate}.xlsx`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                } catch (error) {
+                    console.error('Error exporting data:', error);
+                }
+            };
+            
+        
+            return (
+                <Popover>
+                <PopoverTrigger asChild>
+                    <Button variant="secondary" className="flex items-center">
+                        <Download className="size-4 me-2" /> Export 
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-fit">
+                    <form className="flex gap-2 items-end" onSubmit={handleSubmit}>
+                        <div>
+                            <Label>Start Date</Label>
+                            <Input
+                                type="date"
+                                value={data.startDate || ''}
+                                onChange={e => setData('startDate', e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label>End Date</Label>
+                            <Input
+                                type="date"
+                                value={data.endDate || ''}
+                                onChange={e => setData('endDate', e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Button type="submit" className="w-full">Export</Button>
+                        </div>
+                    </form>
+                </PopoverContent>
+            </Popover>
+            );
+        };
 
     return (
         <AuthenticatedLayout user={auth.user} header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Transactions</h2>}>
@@ -124,6 +188,7 @@ export default function Transactions({ auth, data, activeTab }: PageProps<{ data
                         <CardDescription>View and manage gym transactions</CardDescription>
                     </div>
                     <div className='flex gap-2'>
+                        <ExportTransaction />
                         <TransactionFilter />
                         <TransactionDialog />
                     </div>
