@@ -138,7 +138,7 @@ const MembershipCreationForm = (
                 .then(async (response) => {
                     toast({
                         title: 'Success!',
-                        description: response.data?.is_approved ? 'Membership Created and approved Successfully' : 'Membership Created but yet to be approved. You will be notified on your phone',
+                        description: response.data?.is_approved ? 'Membership created and approved Successfully' : 'Membership created but yet to be approved. You will be notified on your phone',
                         duration: 10000,
                         className: 'bg-muted'
                     })

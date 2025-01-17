@@ -83,7 +83,7 @@ const ConfirmRenewalDialog = ({ application }: { application: any }) => {
         // Posting confirmation of public-side renewal request
         post(route('public-registration.confirm', application.id), {
             onSuccess: () => {
-                toast({ description: "Renewal request confirmed successfully." });
+                toast({ description: "Registration request confirmed successfully." });
                 setOpen(false);
                 reset();
             },
@@ -307,7 +307,7 @@ const ConfirmRenewalDialog = ({ application }: { application: any }) => {
                                 </div>
 
                                 <Button disabled={processing}>
-                                    {processing ? 'Processing...' : 'Confirm Renewal'}
+                                    {processing ? 'Processing...' : 'Confirm Registration'}
                                 </Button>
                             </form>
                         </CardContent>

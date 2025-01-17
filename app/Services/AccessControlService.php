@@ -57,7 +57,7 @@ class AccessControlService
      */
     private function putPhoto($id, string $imagePath, Collection $devices)
     {
-        // dd($imagePath);
+        //dd($imagePath);
         $imagePath = file_get_contents($imagePath);
         $client = new Client();
         foreach ($devices as $device) {

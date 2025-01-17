@@ -43,7 +43,7 @@ export default function Welcome() {
             disableTransitionOnChange
         >
             <div className='w-full h-screen bg-no-repeat bg-cover relative' style={{ backgroundImage: "url('gym-bg.jpg')" }}>
-                <Head title='Welcome to Chitwangym' />
+                <Head title='Welcome to Nexis Fitness' />
                 <div className="absolute w-full min-h-full bg-black/60 text-white" />
                 <div className='relative container min-h-full flex flex-col'>
                     {/* Header section with logo and admin area link */}

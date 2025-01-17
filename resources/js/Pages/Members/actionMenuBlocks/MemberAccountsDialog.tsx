@@ -256,11 +256,13 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                                     <TableHead className="text-center">Date</TableHead>
                                     <TableHead className="text-center">Total</TableHead>
                                     <TableHead className="text-center">Extra Disc.</TableHead>
+                                    <TableHead className="text-center">Net Amount</TableHead>
                                     <TableHead className="text-center">Paid</TableHead>
                                     <TableHead className="text-center">Credit/Adv.</TableHead>
                                     <TableHead className="text-center">Bill/PV No.</TableHead>
                                     <TableHead className="text-center">Transaction Type</TableHead>
                                     <TableHead className="text-center">Payment Mode</TableHead>
+                                    <TableHead className="text-center">Payment Proof</TableHead>
                                     <TableHead className="text-center">Remarks</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -275,9 +277,11 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                                                 {/* Date in custom format */}
                                                 <TableCell>{format(new Date(l.payment_date || l.created_at), 'MMM d, yyyy')}</TableCell>
                                                 {/* Total Amount */}
-                                                <TableCell>{Number(l.refund_amount) ? `Rs ${Number(l.refund_amount)}` : `Rs ${Number(l.net_amount)}`}</TableCell>
+                                                <TableCell>{Number(l.refund_amount) ? `Rs ${Number(l.refund_amount)}` : Number(l.extra_discount) ? `Rs ${Number(l.total_monthly_fees) + Number(l.admission_fees) - Number(l.package_discount)}` : `Rs ${Number(l.net_amount)}`}</TableCell>
                                                 {/* Extra Discount */}
                                                 <TableCell>{l.extra_discount ? `Rs ${Number(l.extra_discount)}` : '-'}</TableCell>
+                                                {/* {Net AMount} */}
+                                                <TableCell>{Number(l.refund_amount) ? `Rs ${Number(l.refund_amount)}` : `Rs ${Number(l.net_amount)}`}</TableCell>
                                                 {/* Paid Amount */}
                                                 <TableCell>{l.paid_amount ? `Rs ${Number(l.paid_amount)}` : '-'}</TableCell>
                                                 {/* Balance / Credit */}
@@ -297,6 +301,17 @@ export function MemberAccountsDialog({ member, open, onClose }: { member: Member
                                                 </TableCell>
                                                 {/* Payment Mode */}
                                                 <TableCell>{l.payment_mode || '-'}</TableCell>
+                                                {/* Payment Proof */}
+                                                <TableCell >
+                                                {
+                                                    
+                                                l.payment_proof ?
+                                                    <a href={l.payment_proof} target="_blank" rel="noopener noreferrer"className="text-gray-500 underline hover:text-purple-700">View</a>
+                                                    :
+                                                    <span className="text-muted-foreground">-</span>
+                                                }
+                                                
+                                                </TableCell>
                                                 {/* Remarks */}
                                                 <TableCell>{l.description || '-'}</TableCell>
                                             </TableRow>

@@ -75,7 +75,7 @@ export function LockerDialog({ member, open, onClose }: { member: Member; open: 
             onSuccess: () => {
                 onClose();
                 toast({
-                    description: `Locker assigned to ${member.name} successfully extended`,
+                    description: `Locker assigned to ${member.name} successfully`,
                     dir: 'left'
                 });
             },

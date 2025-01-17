@@ -224,15 +224,18 @@ const MembershipCreationDialog = () => {
                                                 <InputError message={errors.date_of_birth} className="mt-2" />
                                             </div>
 
-                                            <div>
-                                                <Label htmlFor="preferred_time">Preferred Time</Label>
-                                                <Input
-                                                    id="preferred_time"
-                                                    type="time"
-                                                    value={data.preferred_time}
-                                                    onChange={e => setData('preferred_time', e.target.value)}
-                                                    required
-                                                />
+                                           <div>
+                                                <Label htmlFor="preferred_time">Preferred Shift</Label>
+                                                <Select onValueChange={val => setData('preferred_time', val)}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select preferred shift" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Morning">Morning</SelectItem>
+                                                        <SelectItem value="Day">Day</SelectItem>
+                                                        <SelectItem value="Evening">Evening</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                                 <InputError message={errors.preferred_time} className="mt-2" />
                                             </div>
                                         </div>

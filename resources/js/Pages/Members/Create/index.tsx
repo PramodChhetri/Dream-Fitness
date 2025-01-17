@@ -125,6 +125,34 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
                 toast({ description: "Member Created Successfully..." });
             }
         });
+
+        setData({
+            name: '',
+            phone: '',
+            occupation: '',
+            gender: '' as 'male' | 'female',
+            marital_status: '' as 'married' | 'single',
+            date_of_birth: new Date(new Date().setFullYear(new Date().getFullYear() - 20)).toISOString().split('T')[0],
+            address: '',
+            preferred_time: '',
+            membership_package: packages[0].id,
+            months: 1,
+            payment_mode: '',
+            bill_number: 0,
+            extra_discount: 0,
+            photo: null as null | File,
+            emergency_person_name: '',
+            emergency_person_phone: '',
+            locker_access: false,
+            locker_id: lockers[0]?.id,
+            locker_discount: 0,
+            locker_number: '',
+            paid: 0,
+
+            //for temporary membership
+            net_amount: 0,
+            days_count: 1
+        });
     };
 
 
@@ -132,14 +160,14 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
     return (
         <Authenticated user={auth.user}>
             <Head title='Create Member' />
-            <div className="w-full mx-auto space-y-6">
+            <div className="w-full mx-auto space-y-8">
                 <div className="flex justify-between">
                     <h1 className="text-2xl font-bold">Create a Membership</h1>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-8 space-y-6">
+                        <div className="lg:col-span-6 xl:col-span-7 2xl:col-span-8 space-y-8">
                             {/* Member Information */}
                             <Card>
                                 <CardHeader>
@@ -393,7 +421,7 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
                             </Card>
 
                             {/* Locker Information Section */}
-                            <Card>
+                            {/* <Card>
                                 <CardHeader>
                                     <CardTitle className="text-lg">Locker Information</CardTitle>
                                 </CardHeader>
@@ -455,16 +483,18 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
                                         </div>
                                     </div>
                                 </CardContent>
-                            </Card>
+                            </Card> */}
                         </div>
 
-                        <div className="lg:col-span-6 xl:col-span-5 2xl:col-span-4 space-y-6">
+                        <div className="lg:col-span-6 xl:col-span-5 2xl:col-span-4 space-y-2">
                             {/* Emergency Information */}
                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Emergency Information</CardTitle>
-                                </CardHeader>
+                            
                                 <CardContent className="gap-2 flex flex-col flex-wrap">
+                                <div className="text-lg mb-2 mt-2">
+                                        <strong>Emergency Information</strong>
+                                    </div>
+
                                     <div className='grow'>
                                         <Label htmlFor="emergency_person_name">Person Name</Label>
                                         <Input
@@ -490,11 +520,13 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
 
                             {/* Pricing and Payment Section */}
                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Pricing and Payment</CardTitle>
-                                </CardHeader>
+                                
                                 <CardContent>
-                                    <div className="text-start mb-3">
+                                <div className="text-lg mb-2 mt-2">
+                                        <strong>Pricing Summary</strong>
+                                    </div>
+                                    
+                                    <div className="text-start mb-1">
                                         <strong>{packages.find(p => p.id === data.membership_package)?.package_name}</strong>
                                     </div>
                                     <div className="flex justify-between">
@@ -531,14 +563,14 @@ const MembershipCreationForm = ({ auth, packages, lockers }: PageProps<{
                                         <Label>Net Package Amount</Label>
                                         <span>Rs {netPackageAmount}</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    {/* <div className="flex justify-between">
                                         <Label>Locker Charge ({data.locker_access ? lockers.find(locker => locker.id === data.locker_id)?.months : 0} Months)</Label>
                                         <span>Rs {data.locker_access ? lockers.find(locker => locker.id === data.locker_id)?.price : 0}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <Label>Locker Discount</Label>
                                         <span>- Rs {data.locker_access ? data.locker_discount : 0}</span>
-                                    </div>
+                                    </div> */}
                                     <div className="border mb-2"></div>
                                     <strong className="flex justify-between">
                                         <Label>Net Amount</Label>
