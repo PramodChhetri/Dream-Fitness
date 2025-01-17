@@ -21,9 +21,9 @@ class UsersTableSeeder extends Seeder
                 'email_verified_at' => now()
             ],
             [
-                'name' => 'Dream Fitness Admin',
-                'email' => 'dreamfitness@gmail.com',
-                'password' => Hash::make('dreamfitness'),
+                'name' => 'Demo User',
+                'email' => 'demo@gmail.com',
+                'password' => Hash::make('nexisdemo'),
                 'email_verified_at' => now()
             ],
         ]);

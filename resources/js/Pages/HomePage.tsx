@@ -49,7 +49,7 @@ export default function Welcome() {
                     {/* Header section with logo and admin area link */}
                     <div className='py-7 flex justify-between items-center'>
                         <Link href="/" className="flex items-center py-3 px-5 w-fit">
-                            <span className='text-xl sm:text-2xl text-white font-semibold'>Dream Fitness</span>
+                            <span className='text-xl sm:text-2xl text-white font-semibold'>Nexis Fitness</span>
                         </Link>
                         <div className='flex items-center gap-2'>
                             <Link href="/login" className="text-sm text-gray-200 hover:underline">Go to Admin Area</Link>
@@ -61,7 +61,7 @@ export default function Welcome() {
                         <div className='space-y-4'>
                             {/* Engaging Title and Subtitle */}
                             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center text-white font-extrabold uppercase">
-                                Welcome to Dream Fitness
+                                Welcome to Nexis Fitness
                             </h1>
                             <h3 className='text-white/75 text-center capitalize md:text-lg lg:text-xl font-semibold'>
                                 Your Fitness Journey Starts Here. Let's Achieve Your Goals Together.
